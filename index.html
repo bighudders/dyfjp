@@ -14,40 +14,39 @@
   <button onclick="reset()">Reset</button>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js";
-    import { getDatabase, ref, onValue, set, get } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-database.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+    import { getDatabase, ref, onValue, set, get } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-database.js";
 
-    // ✅ Your Firebase Config
+    // ✅ Your Firebase Config (with corrected storageBucket)
     const firebaseConfig = {
       apiKey: "AIzaSyCoBgZrJy-FL01VOEUSBFv8t_dYDCdVPK0",
       authDomain: "dyfjp-tally.firebaseapp.com",
       databaseURL: "https://dyfjp-tally-default-rtdb.europe-west1.firebasedatabase.app/",
       projectId: "dyfjp-tally",
-      storageBucket: "dyfjp-tally.firebasestorage.app",
+      storageBucket: "dyfjp-tally.appspot.com",
       messagingSenderId: "709741291824",
       appId: "1:709741291824:web:3dc61620407d77eb7380f5",
       measurementId: "G-Z0M0KMQDLB"
     };
 
-    // 🔹 Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const countRef = ref(db, "count");
 
-    // 🔹 Real-time listener (auto-updates when DB changes)
+    // 🔹 Live updates
     onValue(countRef, (snapshot) => {
       const value = snapshot.val() ?? 0;
       document.getElementById("count").innerText = value;
     });
 
-    // 🔹 Increment button
+    // 🔹 Increment function
     async function increment() {
       const snapshot = await get(countRef);
       const newCount = (snapshot.val() ?? 0) + 1;
       await set(countRef, newCount);
     }
 
-    // 🔹 Reset button
+    // 🔹 Reset function
     async function reset() {
       await set(countRef, 0);
     }
