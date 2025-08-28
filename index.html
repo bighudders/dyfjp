@@ -40,10 +40,11 @@
     // 🔹 Attach functions to window (GLOBAL)
     window.increment = async () => {
       const snapshot = await get(countRef);
-      const newCount = (snapshot.val() ?? 0) + 1;
+      const current = Number(snapshot.val()) || 0; // force to number
+      const newCount = current + 1;
       await set(countRef, newCount);
     };
-
+    
     window.reset = async () => {
       await set(countRef, 0);
     };
