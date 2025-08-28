@@ -37,16 +37,16 @@
       document.getElementById("count").innerText = snapshot.val() ?? 0;
     });
 
-    // 🔹 Expose functions globally
-    window.increment = async function () {
+    // 🔹 Attach functions to window (GLOBAL)
+    window.increment = async () => {
       const snapshot = await get(countRef);
       const newCount = (snapshot.val() ?? 0) + 1;
       await set(countRef, newCount);
-    }
+    };
 
-    window.reset = async function () {
+    window.reset = async () => {
       await set(countRef, 0);
-    }
+    };
   </script>
 </body>
 </html>
