@@ -1,51 +1,60 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Global Tally</title>
-  <style>
-    body { font-family: sans-serif; text-align: center; margin-top: 50px; }
-    button { padding: 10px 20px; font-size: 20px; margin: 10px; cursor: pointer; }
-    h1 { font-size: 50px; }
-  </style>
+  <title>Tally</title>
 </head>
 <body>
   <h1 id="count">Loading...</h1>
-  <button onclick="increment()">+1</button>
-  <button onclick="reset()">Reset</button>
+  <button id="login">Login with Google</button>
+  <button id="increment">+1</button>
+  <button id="reset">Reset</button>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
-    import { getDatabase, ref, onValue, set, get } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-database.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+    import { getDatabase, ref, get, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-database.js";
 
     const firebaseConfig = {
-      apiKey: "AIzaSyCoBgZrJy-FL01VOEUSBFv8t_dYDCdVPK0",
-      authDomain: "dyfjp-tally.firebaseapp.com",
-      databaseURL: "https://dyfjp-tally-default-rtdb.europe-west1.firebasedatabase.app/",
-      projectId: "dyfjp-tally",
-      storageBucket: "dyfjp-tally.appspot.com",
-      messagingSenderId: "709741291824",
-      appId: "1:709741291824:web:3dc61620407d77eb7380f5",
-      measurementId: "G-Z0M0KMQDLB"
+      apiKey: "...",
+      authDomain: "...",
+      databaseURL: "...",
+      projectId: "...",
+      storageBucket: "...",
+      messagingSenderId: "...",
+      appId: "..."
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
     const countRef = ref(db, "count");
 
-    // 🔹 Real-time updates
+    // show count
     onValue(countRef, (snapshot) => {
-      document.getElementById("count").innerText = snapshot.val() ?? 0;
+      document.getElementById("count").innerText = snapshot.val();
     });
 
-    // 🔹 Attach functions to window (GLOBAL)
-    window.increment = async () => {
-      const snapshot = await get(countRef);
-      const current = Number(snapshot.val()) || 0; // force to number
-      const newCount = current + 1;
-      await set(countRef, newCount);
+    // login
+    document.getElementById("login").onclick = async () => {
+      try {
+        await signInWithPopup(auth, provider);
+        alert("Logged in as " + auth.currentUser.email + "\nUID: " + auth.currentUser.uid);
+      } catch (err) {
+        console.error(err);
+      }
     };
-    
-    window.reset = async () => {
+
+    // increment
+    document.getElementById("increment").onclick = async () => {
+      const snapshot = await get(countRef);
+      const current = Number(snapshot.val()) || 0;
+      await set(countRef, current + 1);
+    };
+
+    // reset
+    document.getElementById("reset").onclick = async () => {
       await set(countRef, 0);
     };
   </script>
