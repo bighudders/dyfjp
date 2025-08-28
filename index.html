@@ -17,7 +17,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
     import { getDatabase, ref, onValue, set, get } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-database.js";
 
-    // ✅ Your Firebase Config (with corrected storageBucket)
     const firebaseConfig = {
       apiKey: "AIzaSyCoBgZrJy-FL01VOEUSBFv8t_dYDCdVPK0",
       authDomain: "dyfjp-tally.firebaseapp.com",
@@ -33,21 +32,19 @@
     const db = getDatabase(app);
     const countRef = ref(db, "count");
 
-    // 🔹 Live updates
+    // 🔹 Real-time updates
     onValue(countRef, (snapshot) => {
-      const value = snapshot.val() ?? 0;
-      document.getElementById("count").innerText = value;
+      document.getElementById("count").innerText = snapshot.val() ?? 0;
     });
 
-    // 🔹 Increment function
-    async function increment() {
+    // 🔹 Expose functions globally
+    window.increment = async function () {
       const snapshot = await get(countRef);
       const newCount = (snapshot.val() ?? 0) + 1;
       await set(countRef, newCount);
     }
 
-    // 🔹 Reset function
-    async function reset() {
+    window.reset = async function () {
       await set(countRef, 0);
     }
   </script>
