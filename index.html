@@ -4,19 +4,20 @@
   <title>Global Tally</title>
   <style>
     body { font-family: sans-serif; text-align: center; margin-top: 50px; }
-    button { padding: 10px 20px; font-size: 20px; margin: 10px; }
+    button { padding: 10px 20px; font-size: 20px; margin: 10px; cursor: pointer; }
     h1 { font-size: 50px; }
   </style>
 </head>
 <body>
   <h1 id="count">Loading...</h1>
   <button onclick="increment()">+1</button>
+  <button onclick="reset()">Reset</button>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js";
     import { getDatabase, ref, onValue, set, get } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-database.js";
 
-    // 🔹 Replace this with your Firebase config
+    // ✅ Your Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyCoBgZrJy-FL01VOEUSBFv8t_dYDCdVPK0",
       authDomain: "dyfjp-tally.firebaseapp.com",
@@ -28,20 +29,27 @@
       measurementId: "G-Z0M0KMQDLB"
     };
 
+    // 🔹 Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const countRef = ref(db, "count");
 
-    // Listen for changes in real time
+    // 🔹 Real-time listener (auto-updates when DB changes)
     onValue(countRef, (snapshot) => {
       const value = snapshot.val() ?? 0;
       document.getElementById("count").innerText = value;
     });
 
+    // 🔹 Increment button
     async function increment() {
       const snapshot = await get(countRef);
       const newCount = (snapshot.val() ?? 0) + 1;
       await set(countRef, newCount);
+    }
+
+    // 🔹 Reset button
+    async function reset() {
+      await set(countRef, 0);
     }
   </script>
 </body>
