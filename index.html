@@ -91,16 +91,43 @@
       counterEl.innerText = val;
     });
   </script>
-
   <style>
     body { font-family: sans-serif; text-align: center; padding: 2rem; }
     #counter { font-size: 4rem; font-weight: bold; margin: 1rem; }
+  
     button {
-      margin: 0.5rem; padding: 0.5rem 1rem;
-      font-size: 1.2rem; border-radius: 8px; border: none;
-      background: #eee; cursor: pointer; transition: 0.2s;
+      margin: 0.5rem; 
+      padding: 0.5rem 1.2rem;
+      font-size: 1.2rem; 
+      border-radius: 8px; 
+      border: none;
+      cursor: pointer; 
+      transition: 0.2s;
+      color: white;
     }
-    button:hover { background: #ddd; }
+  
+    #plusBtn {
+      background: #2d2e83;
+    }
+    #plusBtn:hover {
+      background: #232365;
+    }
+  
+    #resetBtn {
+      background: #de007e;
+    }
+    #resetBtn:hover {
+      background: #a9005e;
+    }
+  
+    #loginBtn, #logoutBtn {
+      background: #c8d400;
+      color: black; /* better contrast for lime color */
+    }
+    #loginBtn:hover, #logoutBtn:hover {
+      background: #9da600;
+    }
+  
     #toast {
       visibility: hidden; min-width: 250px;
       background: #333; color: #fff;
