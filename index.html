@@ -5,12 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Tally Counter</title>
   <script type="module">
-    // Firebase v9+ modular imports
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
     import { getDatabase, ref, onValue, set, get, child } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-    // Firebase config (safe to leave in frontend)
+    // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyCoBgZrJy-FL01VOEUSBFv8t_dYDCdVPK0",
       authDomain: "dyfjp-tally.firebaseapp.com",
@@ -25,13 +24,12 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const auth = getAuth();
-
     const provider = new GoogleAuthProvider();
 
-    // Replace these with your 2 Google account UIDs
+    // Replace with your two Google UIDs
     const allowedUIDs = ["hLz86iehQogvh45NTRdceZDKDlg2", "Muo0AtihzwN44D7ktyEInA09SHj2"];
 
-    // DOM Elements
+    // DOM elements
     const counterEl = document.getElementById("counter");
     const plusBtn = document.getElementById("plusBtn");
     const resetBtn = document.getElementById("resetBtn");
@@ -39,14 +37,14 @@
     const logoutBtn = document.getElementById("logoutBtn");
     const toast = document.getElementById("toast");
 
-    // Show toast function
+    // Toast helper
     function showToast(message) {
       toast.innerText = message;
       toast.classList.add("show");
       setTimeout(() => toast.classList.remove("show"), 3000);
     }
 
-    // Auth state listener
+    // Auth state
     onAuthStateChanged(auth, (user) => {
       if (user) {
         if (allowedUIDs.includes(user.uid)) {
@@ -78,7 +76,8 @@
 
     plusBtn.addEventListener("click", async () => {
       const snap = await get(child(ref(db), "counter"));
-      const val = snap.exists() ? snap.val() : 0;
+      let val = snap.exists() ? snap.val() : 0;
+      val = parseInt(val, 10) || 0;   // ✅ ensure number
       set(ref(db, "counter"), val + 1);
     });
 
@@ -86,11 +85,11 @@
       set(ref(db, "counter"), 0);
     });
 
-    // Live counter update
+    // Live updates
     onValue(ref(db, "counter"), (snapshot) => {
-      counterEl.innerText = snapshot.val() ?? 0;
+      const val = parseInt(snapshot.val(), 10) || 0;
+      counterEl.innerText = val;
     });
-
   </script>
 
   <style>
@@ -110,9 +109,7 @@
       bottom: 30px; left: 50%; transform: translateX(-50%);
       opacity: 0; transition: opacity 0.5s, visibility 0.5s;
     }
-    #toast.show {
-      visibility: visible; opacity: 1;
-    }
+    #toast.show { visibility: visible; opacity: 1; }
   </style>
 </head>
 <body>
