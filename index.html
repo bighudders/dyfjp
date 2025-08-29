@@ -1,76 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Tally Counter</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-      background: #f7f7f7;
-    }
-    #count {
-      font-size: 3rem;
-      margin-bottom: 1rem;
-      font-weight: bold;
-      text-align: center;
-    }
-    #status {
-      margin-bottom: 1rem;
-      color: #555;
-    }
-    button {
-      font-size: 1.2rem;
-      padding: 0.7rem 1.5rem;
-      margin: 0.5rem;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: background 0.2s ease, transform 0.1s ease;
-    }
-    button:hover {
-      transform: scale(1.05);
-    }
-    #login {
-      background: #4285F4;
-      color: white;
-    }
-    #increment {
-      background: #34A853;
-      color: white;
-    }
-    #reset {
-      background: #EA4335;
-      color: white;
-      display: none; /* hidden by default */
-    }
-  </style>
-</head>
-<body>
-  <h1 id="count">Loading...</h1>
-  <p id="status">Not logged in</p>
-  <div>
-    <button id="login">Login with Google</button>
-    <button id="increment">+1</button>
-    <button id="reset">Reset</button>
-  </div>
-
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
-    import { getDatabase, ref, get, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-database.js";
+    // Firebase v9+ modular imports
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getDatabase, ref, onValue, set, get, child } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
+    // Firebase config (safe to leave in frontend)
     const firebaseConfig = {
-      apiKey: "AIzaSyCoBgZrJy-FL01VOEUSBFv8t_dYDCdVPK0",
+      apiKey: "YOUR_API_KEY",
       authDomain: "dyfjp-tally.firebaseapp.com",
       databaseURL: "https://dyfjp-tally-default-rtdb.europe-west1.firebasedatabase.app",
       projectId: "dyfjp-tally",
-      storageBucket: "dyfjp-tally.firebasestorage.app",
+      storageBucket: "dyfjp-tally.appspot.com",
       messagingSenderId: "709741291824",
       appId: "1:709741291824:web:3dc61620407d77eb7380f5",
       measurementId: "G-Z0M0KMQDLB"
@@ -78,59 +24,104 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const auth = getAuth(app);
+    const auth = getAuth();
+
     const provider = new GoogleAuthProvider();
 
-    const countRef = ref(db, "count");
-
-    // ✅ Replace with your real UIDs
+    // Replace these with your 2 Google account UIDs
     const allowedUIDs = ["hLz86iehQogvh45NTRdceZDKDlg2", "Muo0AtihzwN44D7ktyEInA09SHj2"];
 
-    // show count
-    onValue(countRef, (snapshot) => {
-      const value = Number(snapshot.val()) || 0;
-      document.getElementById("count").innerText = value;
-    });
+    // DOM Elements
+    const counterEl = document.getElementById("counter");
+    const plusBtn = document.getElementById("plusBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const loginBtn = document.getElementById("loginBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const toast = document.getElementById("toast");
 
-    // login
-    document.getElementById("login").onclick = async () => {
-      try {
-        await signInWithPopup(auth, provider);
-      } catch (err) {
-        console.error(err);
-      }
-    };
+    // Show toast function
+    function showToast(message) {
+      toast.innerText = message;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 3000);
+    }
 
-    // auth state listener
+    // Auth state listener
     onAuthStateChanged(auth, (user) => {
-      const status = document.getElementById("status");
-      const resetBtn = document.getElementById("reset");
-
       if (user) {
-        status.innerText = "Logged in as: " + user.email;
-        // show reset only if user is in allowed list
         if (allowedUIDs.includes(user.uid)) {
+          plusBtn.style.display = "inline-block";
           resetBtn.style.display = "inline-block";
         } else {
+          plusBtn.style.display = "none";
           resetBtn.style.display = "none";
+          showToast("You are signed in, but not allowed to update.");
         }
+        loginBtn.style.display = "none";
+        logoutBtn.style.display = "inline-block";
       } else {
-        status.innerText = "Not logged in";
+        plusBtn.style.display = "none";
         resetBtn.style.display = "none";
+        loginBtn.style.display = "inline-block";
+        logoutBtn.style.display = "none";
       }
     });
 
-    // increment
-    document.getElementById("increment").onclick = async () => {
-      const snapshot = await get(countRef);
-      const current = Number(snapshot.val()) || 0;
-      await set(countRef, current + 1);
-    };
+    // Buttons
+    loginBtn.addEventListener("click", () => {
+      signInWithPopup(auth, provider).catch(err => showToast(err.message));
+    });
 
-    // reset
-    document.getElementById("reset").onclick = async () => {
-      await set(countRef, 0);
-    };
+    logoutBtn.addEventListener("click", () => {
+      signOut(auth).catch(err => showToast(err.message));
+    });
+
+    plusBtn.addEventListener("click", async () => {
+      const snap = await get(child(ref(db), "counter"));
+      const val = snap.exists() ? snap.val() : 0;
+      set(ref(db, "counter"), val + 1);
+    });
+
+    resetBtn.addEventListener("click", () => {
+      set(ref(db, "counter"), 0);
+    });
+
+    // Live counter update
+    onValue(ref(db, "counter"), (snapshot) => {
+      counterEl.innerText = snapshot.val() ?? 0;
+    });
+
   </script>
+
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 2rem; }
+    #counter { font-size: 4rem; font-weight: bold; margin: 1rem; }
+    button {
+      margin: 0.5rem; padding: 0.5rem 1rem;
+      font-size: 1.2rem; border-radius: 8px; border: none;
+      background: #eee; cursor: pointer; transition: 0.2s;
+    }
+    button:hover { background: #ddd; }
+    #toast {
+      visibility: hidden; min-width: 250px;
+      background: #333; color: #fff;
+      text-align: center; border-radius: 5px;
+      padding: 12px; position: fixed; z-index: 1;
+      bottom: 30px; left: 50%; transform: translateX(-50%);
+      opacity: 0; transition: opacity 0.5s, visibility 0.5s;
+    }
+    #toast.show {
+      visibility: visible; opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="counter">0</div>
+  <button id="plusBtn" style="display:none;">+1</button>
+  <button id="resetBtn" style="display:none;">Reset</button>
+  <br>
+  <button id="loginBtn">Sign In with Google</button>
+  <button id="logoutBtn" style="display:none;">Sign Out</button>
+  <div id="toast"></div>
 </body>
 </html>
