@@ -82,7 +82,10 @@
     });
 
     resetBtn.addEventListener("click", () => {
-      set(ref(db, "counter"), 0);
+      if (confirm("Are you sure you want to reset the counter?")) {
+        set(ref(db, "counter"), 0);
+        showToast("Counter has been reset.");
+      }
     });
 
     // Live updates
