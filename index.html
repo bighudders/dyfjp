@@ -74,12 +74,21 @@
       signOut(auth).catch(err => showToast(err.message));
     });
 
+    const dohSound = document.getElementById("dohSound");
+    
     plusBtn.addEventListener("click", async () => {
       const snap = await get(child(ref(db), "counter"));
       let val = snap.exists() ? snap.val() : 0;
-      val = parseInt(val, 10) || 0;   // ✅ ensure number
+      val = parseInt(val, 10) || 0;   // ensure number
       set(ref(db, "counter"), val + 1);
+    
+      // Play the sound
+      if (dohSound) {
+        dohSound.currentTime = 0; // rewind to start
+        dohSound.play().catch(err => console.log(err));
+      }
     });
+
 
     resetBtn.addEventListener("click", () => {
       if (confirm("Are you sure you want to reset the counter?")) {
@@ -149,6 +158,7 @@
     alt="Meme" 
     style="max-width:360px; height:auto; display:block; margin:0 auto 1rem;"
   />
+  <audio id="dohSound" src="doh.mp3" preload="auto"></audio>
 
   <div id="counter">0</div>
   <button id="plusBtn" style="display:none;">+1</button>
